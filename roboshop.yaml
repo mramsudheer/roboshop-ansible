@@ -12,7 +12,7 @@
 
     sg_id: sg-0674ace02359e7656
 
-    ami_id: 0220d79f3f480ecf5
+    ami_id: ami-0220d79f3f480ecf5
 
     domain_name: intellifind.store
 
@@ -29,6 +29,12 @@
 
 
   tasks:
+    - name: Action going to Perform
+
+      ansible.builtin.debug:
+
+        msg: "{{ action }}"
+
 
     - name: Create EC2 Instance
 
@@ -104,13 +110,13 @@
 
         ttl: 1
 
-      loop: "{{ instance }}"
+      loop: "{{ instances }}"
 
       when: action == "destroy"
 
 
 
-    - name: Destroc EC2 Instance
+    - name: Destroy EC2 Instance
 
       amazon.aws.ec2_instance:
 
@@ -120,7 +126,7 @@
 
         wait: false
 
-      loop: "{{ instnace }}"
+      loop: "{{ instnaces }}"
 
       when: action == "destroy"
 

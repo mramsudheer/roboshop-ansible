@@ -1,6 +1,8 @@
 - name: Create EC2 instance and R53 records
 
-  hosts: all
+  #hosts: all
+
+  hosts: localhost
 
   connection: local
 
@@ -56,7 +58,15 @@
 
 
 
-    - name: Create EC2 Instance
+    - name: Get existing EC2 instances output
+
+      ansible.builtin.debug:
+
+        msg: "{{ existing_ec2 }}"
+
+
+
+    - name: Create EC2 Instance (only if missing)
 
       amazon.aws.ec2_instance:
 
@@ -68,7 +78,9 @@
 
         image_id: "{{ ami_id }}"
 
-        name: "{{ item }}-{{ env }}"
+        name: "{{ item.item }}-{{ env }}"
+
+        #name: "{{ item }}-{{ env }}"
 
       #loop: "{{ instances }}"
 
@@ -82,7 +94,7 @@
 
       when:
 
-        - action == "destroy"
+        - action == "create"
 
         - item.instances | length == 0
 
@@ -118,9 +130,19 @@
 
         overwrite: true
 
-      loop: "{{ ec2_output.results}}"
+      #loop: "{{ ec2_output.results }}"
 
-      when: action == "create"
+      #when: action == "create"
+
+      loop: "{{ existing_ec2.results }}"
+
+      when: 
+
+        - action == "create"
+
+        - item.instances | length > 0
+
+        #- item.skipped is not defined
 
 
 
@@ -188,4 +210,4 @@
 
 
 
-  
+

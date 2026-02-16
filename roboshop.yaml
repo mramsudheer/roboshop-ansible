@@ -16,6 +16,8 @@
 
     domain_name: intellifind.store
 
+    hosted_zone_id: Z0966494EBSLUZZZRGB4
+
     env: dev
 
     action: create
@@ -26,14 +28,32 @@
 
       - catalog
 
-
+  
 
   tasks:
+
     - name: Action going to Perform
 
       ansible.builtin.debug:
 
         msg: "{{ action }}"
+
+
+
+    - name: Get existing EC2 instances
+
+      amazon.aws.ec2_instance_info:
+
+        filters:
+
+          "tag:Name": "{{ item }}-{{ env }}"
+
+          instance-state-name: [ "pending", "running", "stopping", "stopped" ]
+
+      loop: "{{ instances }}"
+
+      register: existing_ec2
+
 
 
     - name: Create EC2 Instance
@@ -50,11 +70,21 @@
 
         name: "{{ item }}-{{ env }}"
 
-      loop: "{{ instances }}"
+      #loop: "{{ instances }}"
+
+      #register: ec2_output
+
+      #when: action == "create"
+
+      loop: "{{ existing_ec2.results }}"
 
       register: ec2_output
 
-      when: action == "create"
+      when:
+
+        - action == "destroy"
+
+        - item.instances | length == 0
 
 
 
@@ -94,7 +124,21 @@
 
 
 
-    ### DESTROY ###  
+    ### DESTROY ###
+
+    - name: Get existing Route53 records
+
+      amazon.aws.route53_info:
+
+        query: record_sets
+
+        hosted_zone_id: "{{ hosted_zone_id }}"
+
+      register: r53_info
+
+      when: action == "destroy"
+
+
 
     - name: Delete R53 records
 
@@ -112,7 +156,11 @@
 
       loop: "{{ instances }}"
 
-      when: action == "destroy"
+      when: 
+
+        - action == "destroy"
+
+        - (item + '-' + env + '.' + domain_name + '.') in (r53_info.ResourceRecordSets | map(attribute='Name') | list)
 
 
 
@@ -122,11 +170,22 @@
 
         state: absent
 
-        name: "{{ item }}-{{ env }}"
+        name: "{{ item.item }}-{{ env }}"
 
         wait: false
 
-      loop: "{{ instnaces }}"
+      #loop: "{{ instances }}"
 
-      when: action == "destroy"
+      loop: "{{ existing_ec2.results }}"
 
+      #when: action == "destroy"
+
+      when:
+
+        - action == "destroy"
+
+        - item.instances | length > 0
+
+
+
+  

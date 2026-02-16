@@ -192,21 +192,23 @@
 
         state: absent
 
-        name: "{{ item.item }}-{{ env }}"
+        #name: "{{ item.item }}-{{ env }}"
+
+        instance_ids: "{{ item.1.instance_id }}"
 
         wait: false
 
       #loop: "{{ instances }}"
 
-      loop: "{{ existing_ec2.results }}"
+      loop: "{{ existing_ec2.results | subelements('instances', skip_missing=True) }}"
 
-      #when: action == "destroy"
+      when: action == "destroy"
 
-      when:
+      #when:
 
-        - action == "destroy"
+      #  - action == "destroy"
 
-        - item.instances | length > 0
+      #  - item.instances | length > 0
 
 
 

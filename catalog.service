@@ -1,0 +1,27 @@
+[Unit]
+
+Description = Catalog Service
+
+
+
+[Service]
+
+User=roboshop
+
+Environment=MONGO=true
+
+// highlight-start
+
+Environment=MONGO_URL="mongodb://mongodb-dev.intellifind.store:27017/catalogue"
+
+// highlight-end
+
+ExecStart=/bin/node /app/server.js
+
+SyslogIdentifier=catalog
+
+
+
+[Install]
+
+WantedBy=multi-user.target

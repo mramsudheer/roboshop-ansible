@@ -1,0 +1,65 @@
+- name: MongoDb Configuration
+
+  hosts: mongodb
+
+  become: yes
+
+
+
+  tasks:
+
+  - name: Copy mongo Repo
+
+    ansible.builtin.copy:
+
+      src: mongo.repo
+
+      dest: /etc/yum.repos.d/mongo.repo
+
+
+
+  - name: Install MongoDB metapackage if not present
+
+    ansible.builtin.dnf:
+
+      name: mongodb-org
+
+      state: present # This ensures it installs ONLY if missing
+
+  
+
+  # - name: Ensure mongod service is started and enabled
+
+  #   ansible.builtin.service:
+
+  #     name: mongod
+
+  #     state: started
+
+  #     enabled: yes # Use 'enabled' for boot settings
+
+
+
+  - name: allow remote connections
+
+    ansible.builtin.replace:
+
+      path: /etc/mongod.conf
+
+      regexp: '127.0.0.1'
+
+      replace: '0.0.0.0'
+
+
+
+  - name: Restart MongoDB service
+
+    ansible.builtin.service:
+
+      name: mongod
+
+      state: restarted
+
+  
+
+

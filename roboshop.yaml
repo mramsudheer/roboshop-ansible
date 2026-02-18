@@ -58,11 +58,11 @@
 
 
 
-    - name: Get existing EC2 instances output
+    # - name: Get existing EC2 instances output
 
-      ansible.builtin.debug:
+    #   ansible.builtin.debug:
 
-        msg: "{{ existing_ec2 }}"
+    #     msg: "{{ existing_ec2 }}"
 
 
 
@@ -84,13 +84,13 @@
 
       #loop: "{{ instances }}"
 
-      #register: ec2_output
+      #register: EC2_Create_Output
 
       #when: action == "create"
 
       loop: "{{ existing_ec2.results }}"
 
-      register: ec2_output
+      register: EC2_Create_Output
 
       when:
 
@@ -100,13 +100,25 @@
 
 
 
-    - name: Print the output
+    # - name: Print the EC2 Create Output
 
-      ansible.builtin.debug:
+    #   ansible.builtin.debug:
 
-        msg: "{{ ec2_output }}"
+    #     msg: "{{ EC2_Create_Output }}"
 
-      when: action == "create"
+    #   when: action == "create"
+
+
+
+    # - name: Debug DNS Name and IP before Route 53
+
+    #   debug:
+
+    #     msg: "Record: {{ item.item }}-{{ env }} | Value: {{ item.instances[0].private_ip_address }}"
+
+    #   loop: "{{ EC2_Create_Output.results }}"
+
+    #   when: item.instances | length > 0
 
 
 
@@ -118,7 +130,7 @@
 
         zone: "{{ domain_name }}"
 
-        record: "{{ item.item }}-{{ env }}.{{ domain_name }}"
+        record: "{{ item.item.item }}-{{ env }}.{{ domain_name }}"
 
         type: A
 
@@ -130,19 +142,23 @@
 
         overwrite: true
 
-      #loop: "{{ ec2_output.results }}"
+      loop: "{{ EC2_Create_Output.results }}"
 
       #when: action == "create"
 
-      loop: "{{ existing_ec2.results }}"
+      #loop: "{{ existing_ec2.results }}"
 
       when: 
 
         - action == "create"
 
+        - item is not skipped              # <--- Add this to handle second runs
+
+        - item.instances is defined        # <--- Extra safety check
+
         - item.instances | length > 0
 
-        #- item.skipped is not defined
+      
 
 
 
@@ -166,11 +182,11 @@
 
         overwrite: true
 
-      #loop: "{{ ec2_output.results }}"
+      loop: "{{ EC2_Create_Output.results }}"
 
       #when: action == "create"
 
-      loop: "{{ existing_ec2.results }}"
+      #loop: "{{ existing_ec2.results }}"
 
       when: 
 

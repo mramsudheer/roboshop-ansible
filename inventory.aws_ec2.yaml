@@ -1,0 +1,29 @@
+plugin: aws_ec2
+
+regions:
+
+  - us-east-1  # Change to your region
+
+
+
+# Group servers by their Environment tag (dev)
+
+filters:
+
+  tag:Environment: dev
+
+  instance-state-name: [ 'running' ]
+
+
+
+# This creates groups based on the "Name" tag we created in Terraform
+
+# It will create groups like 'mongodb-dev', 'redis-dev', etc.
+
+keyed_groups:
+
+  - key: tags.Name
+
+    separator: ""
+
+

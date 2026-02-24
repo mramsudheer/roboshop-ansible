@@ -74,7 +74,7 @@
 
         url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
 
-        dest: /tmp/catalogue.zip
+        dest: /tmp/catalog.zip
 
 
 
@@ -82,7 +82,7 @@
 
       ansible.builtin.unarchive:
 
-        src: /tmp/catalogue.zip
+        src: /tmp/catalog.zip
 
         dest: /app
 
@@ -134,7 +134,7 @@
 
       ansible.builtin.command: 
 
-        mongosh --host "{{ MONGODB_HOST }}" --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+        mongosh --host "{{ MONGODB_HOST }}" --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalog")'
 
       register: catalog_output
 

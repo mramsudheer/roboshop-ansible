@@ -12,7 +12,7 @@ Environment=MONGO=true
 
 // highlight-start
 
-Environment=MONGO_URL="mongodb://mongodb-dev.intellifind.store:27017/catalogue"
+Environment=MONGO_URL="mongodb://mongodb-dev.intellifind.store:27017/catalog"
 
 // highlight-end
 

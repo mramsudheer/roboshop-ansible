@@ -10,9 +10,9 @@ User=roboshop
 
 Environment=REDIS_HOST="{{ REDIS_HOST }}"
 
-Environment=CATALOG_HOST="{{ CATALOG_HOST }}"
+Environment=CATALOGUE_HOST="{{ CATALOG_HOST }}"
 
-Environment=CATALOG_PORT=8080
+Environment=CATALOGUE_PORT=8080
 
 // highlight-end
 

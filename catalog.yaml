@@ -146,7 +146,27 @@
 
         msg: "{{ catalog_output }}"
 
-    
+
+
+    - name: Correct database name in master-data.js
+
+      ansible.builtin.replace:
+
+        path: /app/db/master-data.js
+
+        regexp: "getSiblingDB\\('catalogue'\\)"
+
+        replace: "getSiblingDB('catalog')"
+
+    - name: Fix hardcoded database name in server.js
+
+      ansible.builtin.replace:
+
+        path: /app/server.js
+
+        regexp: "db = client.db\\('catalogue'\\);"
+
+        replace: "db = client.db('catalog');"
 
     - name: load the products
 

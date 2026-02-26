@@ -64,16 +64,30 @@
 
         enabled: yes
 
+    - name: Create RabbitMQ user
+
+      ansible.builtin.shell: "rabbitmqctl add_user roboshop roboshop123 || true"
+
+      register: user_output
+
+      changed_when: "'already exists' not in user_output.stderr"
 
 
-    - name: Create RabbitMQ user (using rabbitmqctl)
 
-      ansible.builtin.shell: |
+    - name: Set RabbitMQ permissions
 
-        rabbitmqctl add_user roboshop roboshop123 || true
+      ansible.builtin.shell: 'rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"'
 
-        rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+      when: user_output is succeeded
 
-      register: rabbit_user_output
+    # - name: Create RabbitMQ user (using rabbitmqctl)
 
-      changed_when: "'already exists' not in rabbit_user_output.stderr"
+    #   ansible.builtin.shell: |
+
+    #     rabbitmqctl add_user roboshop roboshop123 || true
+
+    #     rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+
+    #   register: rabbit_user_output
+
+    #   changed_when: "'already exists' not in rabbit_user_output.stderr"

@@ -1,43 +1,79 @@
 - name: configure rabbitmq server
+
   hosts: rabbitmq
+
   become: yes
+
   tasks:
-  - name: Cleanup old script-generated repos
-    ansible.builtin.file:
-      path: "/etc/yum.repos.d/{{ item }}"
-      state: absent
-    loop:
-      - rabbitmq_erlang.repo
-      - rabbitmq_rabbitmq-server.repo
 
-  - name: copy rabbitmq repo
-    ansible.builtin.copy:
-      src: rabbitmq.repo
-      dest: /etc/yum.repos.d/rabbitmq.repo
-      mode: '0644'
+    - name: Download Erlang repository script
 
-  - name: Force clean dnf cache
-    ansible.builtin.shell: dnf clean all
+      ansible.builtin.get_url:
 
-  - name: install rabbitmq server
-    ansible.builtin.dnf:
-      name: rabbitmq-server
-      state: present
-      update_cache: yes
+        url: https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh
 
-  - name: start and enable rabbitmq
-    ansible.builtin.service:
-      state: started
-      enabled: yes
-      name: rabbitmq-server
+        dest: /tmp/erlang_repo.sh
 
-  - name: create rabbitmq user
-    community.rabbitmq.rabbitmq_user:
-      user: roboshop 
-      password: roboshop123
-      vhost: /
-      configure_priv: .*
-      read_priv: .*
-      write_priv: .*
-      state: present
+        mode: '0744'
 
+
+
+    - name: Run Erlang repository script
+
+      ansible.builtin.shell: bash /tmp/erlang_repo.sh
+
+
+
+    - name: Download RabbitMQ repository script
+
+      ansible.builtin.get_url:
+
+        url: https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh
+
+        dest: /tmp/rabbitmq_repo.sh
+
+        mode: '0744'
+
+
+
+    - name: Run RabbitMQ repository script
+
+      ansible.builtin.shell: bash /tmp/rabbitmq_repo.sh
+
+
+
+    - name: Install RabbitMQ server
+
+      ansible.builtin.dnf:
+
+        name: rabbitmq-server
+
+        state: present
+
+        update_cache: yes
+
+
+
+    - name: Start and enable RabbitMQ
+
+      ansible.builtin.service:
+
+        name: rabbitmq-server
+
+        state: started
+
+        enabled: yes
+
+
+
+    - name: Create RabbitMQ user (using rabbitmqctl)
+
+      ansible.builtin.shell: |
+
+        rabbitmqctl add_user roboshop roboshop123 || true
+
+        rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+
+      register: rabbit_user_output
+
+      changed_when: "'already exists' not in rabbit_user_output.stderr"
